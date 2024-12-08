@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/22127289_Project2.iml" filepath="$PROJECT_DIR$/.idea/22127289_Project2.iml" />
       <module fileurl="file://$PROJECT_DIR$/client/client.iml" filepath="$PROJECT_DIR$/client/client.iml" />
       <module fileurl="file://$PROJECT_DIR$/server/server.iml" filepath="$PROJECT_DIR$/server/server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/utils/utils.iml" filepath="$PROJECT_DIR$/utils/utils.iml" />
     </modules>
   </component>
 </project>
