@@ -24,13 +24,16 @@ public class serverUtils {
         server = new ServerSocket(port);
         userList = new ArrayList<user>();
         serverPort = port;
+        System.out.println("Done");
         (new connectionPending()).start();
     }
 
     public void closeServer() throws Exception {
         isStop = true;
         server.close();
-        socket.close();
+        if (socket != null) {
+            socket.close();
+        }
     }
 
     public void savePeer(String user, String IP, int port) {
