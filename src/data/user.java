@@ -5,7 +5,10 @@ public class user {
     private String host = "";
     private int port = 0;
 
-    public void setPeer(String name, String host, int port) {
+    public user() {
+        ;
+    }
+    public user(String name, String host, int port) {
         username = name;
         host = host;
         port = port;
