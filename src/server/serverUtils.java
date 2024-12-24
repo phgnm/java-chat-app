@@ -9,7 +9,7 @@ import java.util.*;
 
 public class serverUtils {
     private ArrayList<user> userList = null;
-    private ServerSocket server;
+    private ServerSocket mainServer;
     private Socket socket;
     public boolean isStop = false;
     public boolean isExit = false;
@@ -21,7 +21,7 @@ public class serverUtils {
         return userList;
     }
     public serverUtils(int port) throws Exception {
-        server = new ServerSocket(port);
+        mainServer = new ServerSocket(port);
         userList = new ArrayList<user>();
         serverPort = port;
         System.out.println("Done");
@@ -30,7 +30,7 @@ public class serverUtils {
 
     public void closeServer() throws Exception {
         isStop = true;
-        server.close();
+        mainServer.close();
         if (socket != null) {
             socket.close();
         }
@@ -83,7 +83,7 @@ public class serverUtils {
         }
     }
     public boolean waitForConnection() throws Exception {
-        socket = server.accept();
+        socket = mainServer.accept();
         ObjectInputStream clientIn = new ObjectInputStream(socket.getInputStream());
         String message = (String) clientIn.readObject();
         ArrayList<String> data = decode.getUser(message);
@@ -93,7 +93,7 @@ public class serverUtils {
                 if (command.equals(constants.signUp))
                     savePeerToFile(data.get(0), data.get(2));
                 savePeer(data.get(0), socket.getInetAddress().toString(), Integer.parseInt(data.get(1)));
-
+                server.increaseClientNumber();
             }
             else
                 return false;
@@ -103,7 +103,7 @@ public class serverUtils {
             decode.updateOnline(userList, message);
             if (size != userList.size()) {
                 isExit = true;
-
+                server.decreaseClientNumber();
             }
         }
         return true;
