@@ -1,34 +1,31 @@
 package data;
 
 public class user {
-    private String username = "";
-    private String host = "";
-    private int port = 0;
+    private String userName = "";
+    private String userHost = "";
+    private int userPort = 0;
 
-    public user() {
-        ;
-    }
-    public user(String name, String host, int port) {
-        username = name;
-        host = host;
-        port = port;
+    public void setUser(String name, String host, int port) {
+        userName = name;
+        userHost = host;
+        userPort = port;
     }
     public void setName(String name) {
-        username = name;
+        userName = name;
     }
     public void setHost(String host) {
-        host = host;
+        userHost = host;
     }
     public void setPort(int port) {
-        port = port;
+        userPort = port;
     }
     public String getUsername() {
-        return username;
+        return userName;
     }
     public String getHost() {
-        return host;
+        return userHost;
     }
     public int getPort() {
-        return port;
+        return userPort;
     }
 }

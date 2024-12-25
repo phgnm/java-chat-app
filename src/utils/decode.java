@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class decode {
     public static ArrayList<String> getUser(String message) {
-        ArrayList<String> user = new ArrayList<String>();
+        ArrayList<String> user = new ArrayList<>();
         String[] split = message.split(" ");
         if (split.length > 1) {
             if (split[1].equals(constants.signUp) || split[1].equals(constants.login)) {
@@ -33,14 +33,17 @@ public class decode {
         return split[split.length - 1];
     }
     public static ArrayList<user> getUserList(String message) {
-        ArrayList<user> users = new ArrayList<user>();
+        ArrayList<user> users = new ArrayList<>();
         String[] split = message.split(" ");
         if (split.length > 1) {
             if (split[0].equals(constants.accept)) {
                 for (int i = 1; i < split.length; i++) {
                     String[] splitUser = split[i].split("-");
                     if (splitUser.length == 3) {
-                        user newUser = new user(splitUser[0], splitUser[1].replace("/", ""), Integer.parseInt(splitUser[2]));
+                        user newUser = new user();
+                        newUser.setName(splitUser[0]);
+                        newUser.setHost(splitUser[1].replace("/", ""));
+                        newUser.setPort(Integer.parseInt(splitUser[2]));
                         users.add(newUser);
                     }
                 }
@@ -90,6 +93,6 @@ public class decode {
     }
     public static boolean checkFeedback (String message) {
         String[] split = message.split(" ");
-        return split.length > 1 && split[0].equals(constants.fileRequestFeedback);
+        return split.length > 1 && split[0].equals(constants.fileRequestAckOpen);
     }
 }

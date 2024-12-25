@@ -1,7 +1,5 @@
 package client;
 
-import client.client;
-
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -19,7 +17,7 @@ public class clientUI extends JFrame implements WindowListener {
     private static int serverPort;
     private String name;
     static DefaultListModel<String> model = new DefaultListModel<>();
-    String file = System.getProperty("user.dir") + "server.txt";
+    String File = System.getProperty("user.dir") + "server.txt";
     private JButton saveButton;
 
     public clientUI(String ip, int port_Client, String name, String msg, int port_Server) throws Exception {
@@ -75,6 +73,7 @@ public class clientUI extends JFrame implements WindowListener {
         contentPane.add(panel);
         panel.setLayout(new GridLayout(1, 1));
 
+        System.out.println(model.size());
         activeList = new JList<>(model);
         activeList.setBorder(new EmptyBorder(5, 5, 5, 5));
         activeList.setBackground(Color.WHITE);
@@ -129,7 +128,7 @@ public class clientUI extends JFrame implements WindowListener {
         JLabel lblCurrentPort = new JLabel(String.valueOf(serverPort));
         lblCurrentPort.setFont(new Font("Tahoma", Font.BOLD, 18));
         lblCurrentPort.setForeground(Color.RED);
-        lblCurrentPort.setBounds(90, 20, 75, 25);
+        lblCurrentPort.setBounds(90, 50, 75, 25);
         panel1.add(lblCurrentPort);
 
         JLabel lblClient = new JLabel(String.valueOf(clientPort));
@@ -139,9 +138,7 @@ public class clientUI extends JFrame implements WindowListener {
         panel1.add(lblClient);
 
         saveButton = new JButton("Save Server");
-        saveButton.addActionListener(e -> {
-            saveServer();
-        });
+        saveButton.addActionListener(_ -> saveServer());
         saveButton.setFocusable(false);
         saveButton.setBounds(490, 420, 110, 30);
         contentPane.add(saveButton);
@@ -155,7 +152,11 @@ public class clientUI extends JFrame implements WindowListener {
     }
 
     public static void updateFriends(String msg) {
+        System.out.println("Attempting to add friend: " + msg);
+        System.out.println("Current list before addition: " + model.toString());
         model.addElement(msg);
+        System.out.println("Current list after addition: " + model.toString());
+        System.out.println("List size: " + model.getSize());
     }
 
     public static void resetList() {
@@ -164,7 +165,7 @@ public class clientUI extends JFrame implements WindowListener {
 
     void saveServer() {
         try {
-            FileWriter fw = new FileWriter(file, true);
+            FileWriter fw = new FileWriter(File, true);
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(IPClient + " - " + serverPort);
             bw.newLine();
@@ -203,14 +204,6 @@ public class clientUI extends JFrame implements WindowListener {
             }
             JOptionPane.showMessageDialog(this, "Friend is not found. Please update your list friend");
         }
-    }
-    public static int request(String msg, boolean type) {
-        JFrame frameMessage = new JFrame();
-        if(type) {
-            return JOptionPane.showConfirmDialog(frameMessage, msg, null, JOptionPane.YES_NO_OPTION);
-        }
-        JOptionPane.showMessageDialog(frameMessage, msg);
-        return -1;
     }
 
     @Override

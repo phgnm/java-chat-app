@@ -1,7 +1,9 @@
 package client;
 
+import client.*;
 import utils.*;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.*;
 
@@ -10,14 +12,6 @@ public class clientUtils {
     private ServerSocket user;
     private int port;
     private boolean isStop = false;
-
-    public void stopServer() {
-        isStop = true;
-    }
-
-    public boolean stopStatus() {
-        return isStop;
-    }
 
     public clientUtils(String name) throws Exception {
         username = name;
@@ -44,9 +38,14 @@ public class clientUtils {
                     in = new ObjectInputStream(connection.getInputStream());
                     String message = (String) in.readObject();
                     String name = decode.getNameRequest(message);
-
+                    int res = JOptionPane.showConfirmDialog(new JFrame(), message + " wants to connect with you!", null, JOptionPane.YES_NO_OPTION);
                     ObjectOutputStream out = new ObjectOutputStream(connection.getOutputStream());
-
+                    if (res == 1)
+                        out.writeObject(constants.reject);
+                    else if (res == 0) {
+                        out.writeObject(constants.accept);
+                        new chatUI(username, name, connection, port);
+                    }
                     out.flush();
                 }
                 catch(Exception e) {

@@ -1,6 +1,5 @@
 package client;
 
-import client.clientUtils;
 import utils.*;
 
 import javax.swing.*;
@@ -21,7 +20,6 @@ public class login extends JFrame implements ActionListener {
     private JTextField portField;
     private JTextField usernameField;
     private JPasswordField passwordField;
-    int port;
     String IP;
     String username;
     String password;
@@ -39,10 +37,10 @@ public class login extends JFrame implements ActionListener {
         setContentPane(contentPane);
         contentPane.setLayout(null);
 
-        JLabel lblNewLabel = new JLabel("Connecting to Server");
-        lblNewLabel.setForeground(Color.RED);
-        lblNewLabel.setFont(new Font("Cambria", Font.PLAIN, 32));
-        lblNewLabel.setBounds(200, 0, 350, 50);
+        JLabel lblConnection = new JLabel("Connecting to Server");
+        lblConnection.setForeground(Color.RED);
+        lblConnection.setFont(new Font("Cambria", Font.PLAIN, 32));
+        lblConnection.setBounds(200, 0, 350, 50);
 
         JComboBox comboBox = new JComboBox();
         comboBox.setForeground(Color.DARK_GRAY);
@@ -53,7 +51,7 @@ public class login extends JFrame implements ActionListener {
             e1.printStackTrace();
         }
         if (data == null || data.length == 0) {
-            lblNewLabel.setBounds(200, 24, 350, 50);
+            lblConnection.setBounds(200, 24, 350, 50);
             comboBox.setVisible(false);
         } else {
             comboBox.setModel(new DefaultComboBoxModel(data));
@@ -71,7 +69,7 @@ public class login extends JFrame implements ActionListener {
         comboBox.setFont(new Font("Cambria", Font.PLAIN, 14));
         comboBox.setBounds(270, 50, 150, 40);
 
-        contentPane.add(lblNewLabel);
+        contentPane.add(lblConnection);
         contentPane.add(comboBox);
 
         JPanel panel = new JPanel();
@@ -81,33 +79,33 @@ public class login extends JFrame implements ActionListener {
                 new Font("Cambria", Font.ITALIC | Font.BOLD, 14),
                 new Color(0, 0, 0)));
         panel.setBackground(Color.CYAN);
-        panel.setBounds(50, 98, 600, 280);
+        panel.setBounds(50, 100, 600, 280);
         contentPane.add(panel);
         panel.setLayout(null);
 
-        JLabel lblNewLabel_1 = new JLabel("IP Address  Server");
-        lblNewLabel_1.setFont(new Font("Cambria", Font.BOLD | Font.ITALIC, 14));
-        lblNewLabel_1.setBounds(26, 32, 136, 37);
-        panel.add(lblNewLabel_1);
+        JLabel lblIP = new JLabel("IP Address  Server");
+        lblIP.setFont(new Font("Cambria", Font.BOLD | Font.ITALIC, 14));
+        lblIP.setBounds(25, 30, 135, 35);
+        panel.add(lblIP);
 
-        JLabel lblNewLabel_2 = new JLabel("Port");
-        lblNewLabel_2.setFont(new Font("Cambria", Font.BOLD | Font.ITALIC, 14));
-        lblNewLabel_2.setBounds(26, 92, 45, 37);
-        panel.add(lblNewLabel_2);
+        JLabel lblPort = new JLabel("Port");
+        lblPort.setFont(new Font("Cambria", Font.BOLD | Font.ITALIC, 14));
+        lblPort.setBounds(25, 90, 45, 35);
+        panel.add(lblPort);
 
-        JLabel lblNewLabel_3 = new JLabel("Your Name");
-        lblNewLabel_3.setFont(new Font("Cambria", Font.BOLD | Font.ITALIC, 14));
-        lblNewLabel_3.setBounds(26, 152, 84, 37);
-        panel.add(lblNewLabel_3);
+        JLabel lblName = new JLabel("Your Name");
+        lblName.setFont(new Font("Cambria", Font.BOLD | Font.ITALIC, 14));
+        lblName.setBounds(25, 150, 85, 35);
+        panel.add(lblName);
 
-        JLabel lblNewLabel_4 = new JLabel("Password");
-        lblNewLabel_4.setFont(new Font("Cambria", Font.BOLD | Font.ITALIC, 14));
-        lblNewLabel_4.setBounds(26, 212, 84, 37);
-        panel.add(lblNewLabel_4);
+        JLabel lblPassword = new JLabel("Password");
+        lblPassword.setFont(new Font("Cambria", Font.BOLD | Font.ITALIC, 14));
+        lblPassword.setBounds(25, 210, 85, 35);
+        panel.add(lblPassword);
 
         IPField = new JTextField();
         IPField.setFont(new Font("Cambria", Font.PLAIN, 14));
-        IPField.setBounds(237, 32, 277, 37);
+        IPField.setBounds(235, 30, 275, 35);
         panel.add(IPField);
         IPField.setColumns(10);
         try {
@@ -119,29 +117,29 @@ public class login extends JFrame implements ActionListener {
         portField = new JTextField();
         portField.setText("1227");
         portField.setFont(new Font("Cambria", Font.PLAIN, 14));
-        portField.setBounds(237, 92, 277, 37);
+        portField.setBounds(235, 90, 275, 35);
         panel.add(portField);
         portField.setColumns(10);
 
         usernameField = new JTextField();
         usernameField.setFont(new Font("Cambria", Font.PLAIN, 14));
-        usernameField.setBounds(237, 152, 277, 37);
+        usernameField.setBounds(235, 150, 275, 35);
         panel.add(usernameField);
         usernameField.setColumns(10);
 
         passwordField = new JPasswordField();
-        passwordField.setBounds(237, 212, 277, 37);
+        passwordField.setBounds(235, 210, 275, 35);
         panel.add(passwordField);
         passwordField.setColumns(10);
 
         signupButton = new JButton("Sign up");
-        signupButton.setBounds(100, 402, 200, 40);
+        signupButton.setBounds(100, 400, 200, 40);
         signupButton.setFont(new Font("Cambria", Font.PLAIN, 16));
         signupButton.addActionListener(this);
         contentPane.add(signupButton);
 
         connectButton = new JButton("Connect to server");
-        connectButton.setBounds(375, 402, 200, 40);
+        connectButton.setBounds(375, 400, 200, 40);
         connectButton.setFont(new Font("Cambria", Font.PLAIN, 16));
         connectButton.addActionListener(this);
         contentPane.add(connectButton);
@@ -158,16 +156,15 @@ public class login extends JFrame implements ActionListener {
                 String command = e.getActionCommand();
 
                 try {
-                    // Login
                     Random rd = new Random();
-                    int portPeer = 10000 + rd.nextInt() % 1000;
-                    InetAddress ipServer = InetAddress.getByName(IP);
-                    int portServer = Integer.parseInt(portField.getText());
-                    Socket socketClient = new Socket(ipServer, portServer);
+                    int clientPort = 10000 + rd.nextInt() % 1000;
+                    InetAddress serverIP = InetAddress.getByName(IP);
+                    int serverPort = Integer.parseInt(portField.getText());
+                    Socket socketClient = new Socket(serverIP, serverPort);
 
                     String msg = command.equals("Sign up") ?
-                            encode.signUp(username, Integer.toString(portPeer), password)
-                            : encode.login(username, Integer.toString(portPeer), password);
+                            encode.signUp(username, Integer.toString(clientPort), password)
+                            : encode.login(username, Integer.toString(clientPort), password);
                     ObjectOutputStream out = new ObjectOutputStream(socketClient.getOutputStream());
                     out.writeObject(msg);
                     out.flush();
@@ -181,7 +178,7 @@ public class login extends JFrame implements ActionListener {
                                 "Login Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    new clientUI(IP, portPeer, username, msg, portServer);
+                    new clientUI(IP, clientPort, username, msg, serverPort);
                     this.dispose();
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, constants.serverOff, "Login Error", JOptionPane.ERROR_MESSAGE);
@@ -194,15 +191,12 @@ public class login extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    login frame = new login();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                login frame = new login();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

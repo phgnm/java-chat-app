@@ -13,7 +13,6 @@ public class serverUtils {
     private Socket socket;
     public boolean isStop = false;
     public boolean isExit = false;
-    private static int serverPort;
 
     String file = System.getProperty("user.dir") + "\\client.txt";
 
@@ -22,31 +21,28 @@ public class serverUtils {
     }
     public serverUtils(int port) throws Exception {
         mainServer = new ServerSocket(port);
-        userList = new ArrayList<user>();
-        serverPort = port;
-        System.out.println("Done");
+        userList = new ArrayList<>();
         (new connectionPending()).start();
     }
 
     public void closeServer() throws Exception {
         isStop = true;
         mainServer.close();
-        if (socket != null) {
-            socket.close();
-        }
+        socket.close();
     }
 
     public void savePeer(String user, String IP, int port) {
+        user newUser = new user();
         if (userList.isEmpty())
-            userList = new ArrayList<user>();
-        user newUser = new user(user, IP, port);
+            userList = new ArrayList<>();
+        newUser.setUser(user, IP, port);
         userList.add(newUser);
     }
 
     public void savePeerToFile(String name, String password) {
         try (FileWriter f = new FileWriter(file, true);
              BufferedWriter b = new BufferedWriter(f);
-             PrintWriter p = new PrintWriter(b);){
+             PrintWriter p = new PrintWriter(b)){
             p.println(name + "~" + password);
         }
         catch (IOException e) {
@@ -86,6 +82,7 @@ public class serverUtils {
         socket = mainServer.accept();
         ObjectInputStream clientIn = new ObjectInputStream(socket.getInputStream());
         String message = (String) clientIn.readObject();
+        System.out.println("Message: " + message);
         ArrayList<String> data = decode.getUser(message);
         String command = decode.getLoginCmd(message);
         if (data != null) {
@@ -110,14 +107,13 @@ public class serverUtils {
     }
     public String sendSession() {
         StringBuilder message = new StringBuilder(constants.accept + " ");
-        int size = userList.size();
         for (user current : userList) {
             message.append(current.getUsername());
             message.append("-");
             message.append(current.getHost());
             message.append("-");
             message.append(current.getPort());
-            message.append("-");
+            message.append(" ");
         }
         return message.toString();
     }

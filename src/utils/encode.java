@@ -32,7 +32,7 @@ public class encode {
             findMessage = messageCheck.matcher(message);
         }
         result.append(message);
-        return constants.openChat + ' ' + result;
+        return constants.messageOpen + ' ' + result;
     }
     public static String sendFile(String name) {
         return constants.fileRequestOpen + ' ' + name;

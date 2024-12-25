@@ -1,9 +1,10 @@
 package client;
 
-import client.clientUI;
+import client.*;
 import data.user;
 import utils.*;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -45,6 +46,7 @@ public class client {
         out.flush();
         in = new ObjectInputStream(clientSocket.getInputStream());
         message = (String) in.readObject();
+        in.close();
         clientList = decode.getUserList(message);
         new Thread(this::updateFriend);
     }
@@ -69,11 +71,11 @@ public class client {
         ObjectInputStream in = new ObjectInputStream(connectionSocket.getInputStream());
         String message = (String) in.readObject();
         if (message.equals(constants.reject)) {
-            clientUI.request("Your friend denied to connect with you!", false);
+            JOptionPane.showMessageDialog(new JFrame(), "Your friend denied to connect with you!");
             connectionSocket.close();
             return;
         }
-        // chatFrame
+        new chatUI(username, guest, connectionSocket, clientPort);
     }
 
     public void updateFriend() {
@@ -81,8 +83,9 @@ public class client {
         clientUI.resetList();
         int i = 0;
         while (i < size) {
-            if (!clientList.get(i).getUsername().equals(username))
+            if (!clientList.get(i).getUsername().equals(username)) {
                 clientUI.updateFriends(clientList.get(i).getUsername());
+            }
             i++;
         }
     }
