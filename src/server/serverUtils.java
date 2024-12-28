@@ -14,7 +14,7 @@ public class serverUtils {
     public boolean isStop = false;
     public boolean isExit = false;
 
-    String file = System.getProperty("user.dir") + "\\client.txt";
+    String file = System.getProperty("user.dir") + "\\src\\client.txt";
 
     ArrayList<user> getUserList() {
         return userList;

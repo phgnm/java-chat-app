@@ -17,7 +17,7 @@ public class clientUI extends JFrame implements WindowListener {
     private static int serverPort;
     private String name;
     static DefaultListModel<String> model = new DefaultListModel<>();
-    String File = System.getProperty("user.dir") + "server.txt";
+    String File = System.getProperty("user.dir") + "\\src\\server.txt";
     private JButton saveButton;
 
     public clientUI(String ip, int port_Client, String name, String msg, int port_Server) throws Exception {

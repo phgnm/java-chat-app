@@ -129,21 +129,18 @@ public class server extends JFrame {
 
         startButton = new JButton("Start");
         startButton.setFocusable(false);
-        startButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    port = Integer.parseInt(Port.getText());
-                    sUtils = new serverUtils(port);
-                    server.updateMessage("SERVER STARTS ON PORT " + port);
-                    status.setText("<html><font color='green'>RUNNING...</font></html>");
-                    stopButton.setEnabled(true);
-                    startButton.setEnabled(false);
-                }
-                catch (Exception ex) {
-                    server.updateMessage("START ERROR");
-                    ex.printStackTrace();
-                }
+        startButton.addActionListener(e -> {
+            try {
+                port = Integer.parseInt(Port.getText());
+                sUtils = new serverUtils(port);
+                server.updateMessage("SERVER STARTS ON PORT " + port);
+                status.setText("<html><font color='green'>RUNNING...</font></html>");
+                stopButton.setEnabled(true);
+                startButton.setEnabled(false);
+            }
+            catch (Exception ex) {
+                server.updateMessage("START ERROR");
+                ex.printStackTrace();
             }
         });
         startButton.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -195,16 +192,13 @@ public class server extends JFrame {
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    server menu = new server();
-                    menu.setVisible(true);
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                server menu = new server();
+                menu.setVisible(true);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

@@ -25,7 +25,7 @@ public class login extends JFrame implements ActionListener {
     String password;
     JButton connectButton;
     JButton signupButton;
-    String file = System.getProperty("user.dir") + "\\server.txt";
+    String file = System.getProperty("user.dir") + "\\src\\server.txt";
     List<String> serverList = new ArrayList<>();
 
     public login() {

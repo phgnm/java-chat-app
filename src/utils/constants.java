@@ -13,6 +13,7 @@ public class constants {
     public static String startChat = "<CHAT_START>";
     public static String messageOpen = "<MESSAGE_OPEN>";
     public static String closeChat = "<CHAT_CLOSE>";
+    public static String deleteMessage = "<MESSAGE_DELETE>";
 
     public static String onlineServer = "<ONLINE_SERVER>";
     public static String offlineServer = "<OFFLINE_SERVER>";
