@@ -38,7 +38,7 @@ public class clientUtils {
                     in = new ObjectInputStream(connection.getInputStream());
                     String message = (String) in.readObject();
                     String name = decode.getNameRequest(message);
-                    int res = JOptionPane.showConfirmDialog(new JFrame(), message + " wants to connect with you!", null, JOptionPane.YES_NO_OPTION);
+                    int res = JOptionPane.showConfirmDialog(new JFrame(), name + " wants to connect with you!", null, JOptionPane.YES_NO_OPTION);
                     ObjectOutputStream out = new ObjectOutputStream(connection.getOutputStream());
                     if (res == 1)
                         out.writeObject(constants.reject);

@@ -8,6 +8,7 @@ import javax.swing.border.*;
 import javax.swing.text.html.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
@@ -19,12 +20,13 @@ public class chatUI extends JFrame {
     public boolean isStop = false, isSendFile = false, isReceiveFile = false;
     private ChatRoom chat;
     private int portServer = 0;
+    private ArrayList<String> chatHistory = new ArrayList<>();
 
     @Serial
     private static final long serialVersionUID = 1L;
     private JTextField Messages;
     private JTextPane MessagesPane;
-    private JButton btnSendFile;
+    private JButton sendButton;
     private JLabel receiveStatus;
     private chatUI frame = this;
     private JProgressBar progressBar;
@@ -187,8 +189,8 @@ public class chatUI extends JFrame {
         btnSend.setBounds(498, 5, 50, 50);
         panel_3.add(btnSend);
 
-        btnSendFile = new JButton();
-        btnSendFile.addActionListener(new ActionListener() {
+        sendButton = new JButton();
+        sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
@@ -212,10 +214,10 @@ public class chatUI extends JFrame {
                 }
             }
         });
-        btnSendFile.setBorder(new EmptyBorder(0, 0, 0, 0));
-        btnSendFile.setContentAreaFilled(false);
-        btnSendFile.setBounds(440, 5, 50, 50);
-        panel_3.add(btnSendFile);
+        sendButton.setBorder(new EmptyBorder(0, 0, 0, 0));
+        sendButton.setContentAreaFilled(false);
+        sendButton.setBounds(440, 5, 50, 50);
+        panel_3.add(sendButton);
 
         Messages = new JTextField();
         Messages.setBounds(20, 0, 413, 58);
@@ -291,7 +293,7 @@ public class chatUI extends JFrame {
                             sendMessage(msg);
 
                         } else if (decode.checkFeedback(msgObj)) {
-                            btnSendFile.setEnabled(false);
+                            sendButton.setEnabled(false);
 
                             new Thread(new Runnable() {
                                 @Override
@@ -348,14 +350,14 @@ public class chatUI extends JFrame {
         }
 
         public void sendFile(File file) throws Exception {
-            btnSendFile.setEnabled(false);
+            sendButton.setEnabled(false);
             getData(file);
             receiveStatus.setVisible(true);
             if (sizeOfData > constants.maxMsgSize / 1024) {
                 receiveStatus.setText("File is too large...");
                 fileSend.close();
                 sendMessage(constants.dataClose);
-                btnSendFile.setEnabled(true);
+                sendButton.setEnabled(true);
                 isSendFile = false;
                 fileSend.close();
                 return;
@@ -388,7 +390,7 @@ public class chatUI extends JFrame {
                                     progressBar.setVisible(false);
                                     receiveStatus.setVisible(false);
                                     isSendFile = false;
-                                    btnSendFile.setEnabled(true);
+                                    sendButton.setEnabled(true);
                                     updateChat_notify("File sent complete");
                                     fileSend.close();
                                 }

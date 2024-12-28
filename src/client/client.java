@@ -48,7 +48,7 @@ public class client {
         message = (String) in.readObject();
         in.close();
         clientList = decode.getUserList(message);
-        new Thread(this::updateFriend);
+        new Thread(this::updateFriend).start();
     }
     public void exit() throws Exception {
         isStop = true;
@@ -80,6 +80,7 @@ public class client {
 
     public void updateFriend() {
         int size = clientList.size();
+        System.out.println("Friends size: " + size);
         clientUI.resetList();
         int i = 0;
         while (i < size) {

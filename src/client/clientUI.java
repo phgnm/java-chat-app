@@ -73,7 +73,7 @@ public class clientUI extends JFrame implements WindowListener {
         contentPane.add(panel);
         panel.setLayout(new GridLayout(1, 1));
 
-        System.out.println(model.size());
+        System.out.println("Number of friends: " + model.size());
         activeList = new JList<>(model);
         activeList.setBorder(new EmptyBorder(5, 5, 5, 5));
         activeList.setBackground(Color.WHITE);
@@ -152,11 +152,7 @@ public class clientUI extends JFrame implements WindowListener {
     }
 
     public static void updateFriends(String msg) {
-        System.out.println("Attempting to add friend: " + msg);
-        System.out.println("Current list before addition: " + model.toString());
         model.addElement(msg);
-        System.out.println("Current list after addition: " + model.toString());
-        System.out.println("List size: " + model.getSize());
     }
 
     public static void resetList() {
