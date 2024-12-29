@@ -177,7 +177,7 @@ public class clientUI extends JFrame implements WindowListener {
             bw.newLine();
             bw.close();
 
-            JOptionPane.showMessageDialog(this, "Server was successful saved.");
+            JOptionPane.showMessageDialog(this, "Server was successfully saved.");
             saveButton.setVisible(false);
         } catch (Exception e1) {
             e1.printStackTrace();

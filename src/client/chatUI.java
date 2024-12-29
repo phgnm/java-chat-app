@@ -105,10 +105,6 @@ public class chatUI extends JFrame {
         String filename = currentList[0] + "_" + currentList[1] + ".txt";
 
         String historyFile = URL_DIR + "\\src\\history\\" + filename;
-        File historyDir = new File(URL_DIR + "\\src\\history");
-        if (!historyDir.exists()) {
-            historyDir.mkdirs();
-        }
 
         File historyFileObj = new File(historyFile);
         if (!historyFileObj.exists()) {
@@ -121,7 +117,7 @@ public class chatUI extends JFrame {
         }
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(historyDir));
+            BufferedReader br = new BufferedReader(new FileReader(historyFile));
             String chatLine;
             while ((chatLine = br.readLine()) != null) {
                 String[] chatComponents = chatLine.split("```");

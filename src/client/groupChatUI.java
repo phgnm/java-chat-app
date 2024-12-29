@@ -75,10 +75,10 @@ public class groupChatUI extends JFrame {
         }
     }
 
-    public void updateChat_receive(String msg) {
+    public void updateChat_receive(String sender, String msg) {
         String messageHtml = "<div style='margin: 5px;'>"
                 + "<div style='float: left; background-color: #f1f0f0; padding: 8px; border-radius: 8px; max-width: 50%;'>"
-                + msg + "<br><span style='color: gray; font-size: 12px;'>"
+                + sender + ": " + msg + "<br><span style='color: gray; font-size: 12px;'>"
                 + LocalDateTime.now().getHour() + ":" + LocalDateTime.now().getMinute() + "</span>"
                 + "<a href='delete:" + chatHistory.size() + "' style='margin-left: 10px; color: #ff4444;'>[Delete]</a>"
                 + "</div><div style='clear: both;'></div></div>";
@@ -131,7 +131,7 @@ public class groupChatUI extends JFrame {
                     if (chatComponents[0].equals(userName)) {
                         updateChat_send(chatComponents[1]);
                     } else {
-                        updateChat_receive(chatComponents[1]);
+                        updateChat_receive(chatComponents[0], chatComponents[1]);
                     }
                 }
             }
@@ -196,7 +196,7 @@ public class groupChatUI extends JFrame {
                 if (chatComponents[0].equals(userName)) {
                     updateChat_send(chatComponents[1]);
                 } else {
-                    updateChat_receive(chatComponents[1]);
+                    updateChat_receive(chatComponents[0], chatComponents[1]);
                 }
             }
         }
@@ -386,9 +386,8 @@ public class groupChatUI extends JFrame {
                             Object obj = in.readObject();
 
                             if (connects.size() > 1) {
-                                // Forward to all other connections except the sender
                                 for (Socket otherConnection : connects) {
-                                    if (otherConnection != connection) {  // Don't send back to sender
+                                    if (otherConnection != connection) {
                                         ObjectOutputStream otherOut = new ObjectOutputStream(otherConnection.getOutputStream());
                                         otherOut.writeObject(obj);
                                         otherOut.flush();
@@ -457,7 +456,7 @@ public class groupChatUI extends JFrame {
                                     out = new FileOutputStream(URL_DIR + nameReceivedFile);
                                 }
                                 else if (msgObj.equals(constants.dataClose)) {
-                                    updateChat_receive(
+                                    updateChat_receive(userName,
                                             "You receive file: " + nameReceivedFile + " with size " + Received + " KB");
                                     Received = 0;
                                     out.flush();
@@ -469,7 +468,7 @@ public class groupChatUI extends JFrame {
                                 }
                                 else {
                                     String message = decode.getMessage(msgObj);
-                                    updateChat_receive(message);
+                                    updateChat_receive(userName, message);
                                 }
                             } else if (obj instanceof file data) {
                                 ++Received;
