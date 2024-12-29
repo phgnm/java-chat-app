@@ -82,7 +82,6 @@ public class serverUtils {
         socket = mainServer.accept();
         ObjectInputStream clientIn = new ObjectInputStream(socket.getInputStream());
         String message = (String) clientIn.readObject();
-        System.out.println("Message: " + message);
         ArrayList<String> data = decode.getUser(message);
         String command = decode.getLoginCmd(message);
         if (data != null) {

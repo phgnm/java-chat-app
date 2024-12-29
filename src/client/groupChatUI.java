@@ -17,7 +17,6 @@ import java.util.List;
 
 public class groupChatUI extends JFrame {
     private static String URL_DIR = System.getProperty("user.dir");
-    private Socket socketChat;
     private String userName = "", nameFile = "", groupName = "";
     public boolean isStop = false, isSendFile = false, isReceiveFile = false;
     private ChatRoom chat;
@@ -36,24 +35,24 @@ public class groupChatUI extends JFrame {
     private JProgressBar progressBar;
     private JButton sendButton;
 
-    public groupChatUI(String user, ArrayList<String> guest, Socket socket, int port, String groupname) {
+    public groupChatUI(String user, ArrayList<String> guest, List<Socket> connections, int port, String groupname) {
         super();
         userName = user;
         guestName = guest;
-        socketChat = socket;
+        socketChats = connections;
         groupName = groupname;
-        frame = new groupChatUI(user, guest, socket, port, groupName, port);
+        frame = new groupChatUI(user, guest, connections, port, groupName, port);
         frame.setVisible(true);
     }
 
-    public groupChatUI(String user, ArrayList<String> guest, Socket socket, int port, String groupname, int a) {
+    public groupChatUI(String user, ArrayList<String> guest, List<Socket> connections, int port, String groupname, int a) {
         super();
         userName = user;
         guestName = guest;
-        socketChat = socket;
+        socketChats = connections;
         groupName = groupname;
         this.portServer = port;
-        chat = new ChatRoom(socketChat, userName, guestName, groupName);
+        chat = new ChatRoom(socketChats, userName, guestName, groupName);
         chat.start();
         EventQueue.invokeLater(() -> {
             try {
@@ -361,15 +360,15 @@ public class groupChatUI extends JFrame {
     }
 
     public class ChatRoom extends Thread {
-        private Socket connect;
+        private List<Socket> connects;
         private boolean continueSendFile = true, finishReceive = false;
         private int Sent = 0, sizeOfData = 0, sizeOfFile = 0, Received = 0;
         private String nameReceivedFile = "";
         private InputStream fileSend;
         private file dataFile;
 
-        public ChatRoom(Socket connection, String name, ArrayList<String> guest, String groupname) {
-            connect = connection;
+        public ChatRoom(List<Socket> connections, String name, ArrayList<String> guest, String groupname) {
+            connects = connections;
             guestName = guest;
             groupName = groupname;
         }
@@ -377,96 +376,123 @@ public class groupChatUI extends JFrame {
         @Override
         public void run() {
             super.run();
-            OutputStream out = null;
-            while (!isStop) {
+            List<Thread> listenerThreads = new ArrayList<>();
+
+            // Create a listener thread for each connection
+            for (Socket connection : connects) {
+                Thread listenerThread = new Thread(() -> {
+                    OutputStream out = null;
+                    while (!isStop) {
+                        try {
+                            ObjectInputStream in = new ObjectInputStream(connection.getInputStream());
+                            Object obj = in.readObject();
+
+                            if (connects.size() > 1) {
+                                // Forward to all other connections except the sender
+                                for (Socket otherConnection : connects) {
+                                    if (otherConnection != connection) {  // Don't send back to sender
+                                        ObjectOutputStream otherOut = new ObjectOutputStream(otherConnection.getOutputStream());
+                                        otherOut.writeObject(obj);
+                                        otherOut.flush();
+                                    }
+                                }
+                            }
+
+                            if (obj instanceof String) {
+                                String msgObj = obj.toString();
+                                if (msgObj.equals(constants.closeChat)) {
+                                    isStop = true;
+                                    JOptionPane.showMessageDialog(frame, "A group member has left the chat!");
+                                    try {
+                                        isStop = true;
+                                        frame.dispose();
+                                        chat.sendMessage(constants.closeChat);
+                                        chat.stopChat();
+                                        System.gc();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                    break;
+                                }
+                                else if (msgObj.startsWith(constants.deleteMessage)) {
+                                    String indexStr = msgObj.substring(constants.deleteMessage.length());
+                                    int messageIndex = Integer.parseInt(indexStr);
+                                    if (messageIndex >= 0 && messageIndex < chatHistory.size()) {
+                                        chatHistory.remove(messageIndex);
+                                        String filename = "Group_" + groupName + ".txt";
+                                        String historyFile = URL_DIR + "\\src\\history\\" + filename;
+
+                                        FileWriter writer = new FileWriter(historyFile);
+                                        for (String message : chatHistory) {
+                                            writer.write(message + "\n");
+                                        }
+                                        writer.close();
+                                        SwingUtilities.invokeLater(groupChatUI.this::refreshChatDisplay);
+                                    }
+                                }
+                                else if (decode.checkFile(msgObj)) {
+                                    isReceiveFile = true;
+                                    nameReceivedFile = msgObj.replace(constants.fileRequestOpen + " ", "");
+                                    File fileReceive = new File(URL_DIR + "/" + nameReceivedFile);
+                                    if (!fileReceive.exists()) {
+                                        fileReceive.createNewFile();
+                                    }
+                                    String msg = constants.fileRequestAckOpen + " " + Integer.toBinaryString(portServer);
+                                    sendMessage(msg);
+                                }
+                                else if (decode.checkFeedback(msgObj)) {
+                                    sendFileButton.setEnabled(false);
+
+                                    new Thread(() -> {
+                                        try {
+                                            sendMessage(constants.dataBegin);
+                                            updateChat_notify("You are sending file: " + nameFile);
+                                            isSendFile = false;
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }).start();
+                                }
+                                else if (msgObj.equals(constants.dataBegin)) {
+                                    finishReceive = false;
+                                    receiveStatus.setVisible(true);
+                                    out = new FileOutputStream(URL_DIR + nameReceivedFile);
+                                }
+                                else if (msgObj.equals(constants.dataClose)) {
+                                    updateChat_receive(
+                                            "You receive file: " + nameReceivedFile + " with size " + Received + " KB");
+                                    Received = 0;
+                                    out.flush();
+                                    out.close();
+                                    receiveStatus.setVisible(false);
+
+                                    new Thread(this::showSaveFile).start();
+                                    finishReceive = true;
+                                }
+                                else {
+                                    String message = decode.getMessage(msgObj);
+                                    updateChat_receive(message);
+                                }
+                            } else if (obj instanceof file data) {
+                                ++Received;
+                                out.write(data.data);
+                            }
+                        } catch (Exception e) {
+                            File fileTemp = new File(URL_DIR + "\\" + nameReceivedFile);
+                            if (fileTemp.exists() && !finishReceive) {
+                                fileTemp.delete();
+                            }
+                        }
+                    }
+                });
+                listenerThread.start();
+                listenerThreads.add(listenerThread);
+            }
+            for (Thread thread : listenerThreads) {
                 try {
-                    ObjectInputStream in = new ObjectInputStream(connect.getInputStream());
-                    Object obj = in.readObject();
-                    if (obj instanceof String) {
-                        String msgObj = obj.toString();
-                        if (msgObj.equals(constants.closeChat)) {
-                            isStop = true;
-                            JOptionPane.showMessageDialog(frame, "Your friend denied to connect with you!");
-                            try {
-                                isStop = true;
-                                frame.dispose();
-                                chat.sendMessage(constants.closeChat);
-                                chat.stopChat();
-                                System.gc();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            connect.close();
-                            break;
-                        }
-                        else if (msgObj.startsWith(constants.deleteMessage)) {
-                            String indexStr = msgObj.substring(constants.deleteMessage.length());
-                            int messageIndex = Integer.parseInt(indexStr);
-                            if (messageIndex >= 0 && messageIndex < chatHistory.size()) {
-                                chatHistory.remove(messageIndex);
-                                String filename = "Group_" + groupName + ".txt";
-                                String historyFile = URL_DIR + "\\src\\history\\" + filename;
-
-                                FileWriter writer = new FileWriter(historyFile);
-                                for (String message : chatHistory) {
-                                    writer.write(message + "\n");
-                                }
-                                writer.close();
-                                SwingUtilities.invokeLater(groupChatUI.this::refreshChatDisplay);
-                            }
-                        }
-                        else if (decode.checkFile(msgObj)) {
-                            isReceiveFile = true;
-                            nameReceivedFile = msgObj.replace(constants.fileRequestOpen + " ", "");
-                            File fileReceive = new File(URL_DIR + "/" + nameReceivedFile);
-                            if (!fileReceive.exists()) {
-                                fileReceive.createNewFile();
-                            }
-                            String msg = constants.fileRequestAckOpen + " " + Integer.toBinaryString(portServer);
-                            sendMessage(msg);
-                        }
-                        else if (decode.checkFeedback(msgObj)) {
-                            sendFileButton.setEnabled(false);
-
-                            new Thread(() -> {
-                                try {
-                                    sendMessage(constants.dataBegin);
-                                    updateChat_notify("You are sending file: " + nameFile);
-                                    isSendFile = false;
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }).start();
-                        }
-                        else if (msgObj.equals(constants.dataBegin)) {
-                            finishReceive = false;
-                            receiveStatus.setVisible(true);
-                            out = new FileOutputStream(URL_DIR + nameReceivedFile);
-                        }
-                        else if (msgObj.equals(constants.dataClose)) {
-                            updateChat_receive(
-                                    "You receive file: " + nameReceivedFile + " with size " + Received + " KB");
-                            Received = 0;
-                            out.flush();
-                            out.close();
-                            receiveStatus.setVisible(false);
-
-                            new Thread(this::showSaveFile).start();
-                            finishReceive = true;
-                        }
-                        else {
-                            String message = decode.getMessage(msgObj);
-                            updateChat_receive(message);
-                        }
-                    } else if (obj instanceof file data) {
-                        ++Received;
-                        out.write(data.data);
-                    }
-                } catch (Exception e) {
-                    File fileTemp = new File(URL_DIR + "\\" + nameReceivedFile);
-                    if (fileTemp.exists() && !finishReceive) {
-                        fileTemp.delete();
-                    }
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -565,24 +591,34 @@ public class groupChatUI extends JFrame {
         }
 
         public synchronized void sendMessage(Object obj) throws Exception {
-            ObjectOutputStream out = new ObjectOutputStream(connect.getOutputStream());
-            if (obj instanceof String) {
-                String message = obj.toString();
-                out.writeObject(message);
+            if (connects.size() == 1) {
+                ObjectOutputStream out = new ObjectOutputStream(connects.getFirst().getOutputStream());
+                if (obj instanceof String) {
+                    out.writeObject(obj);
+                } else if (obj instanceof file) {
+                    out.writeObject(obj);
+                }
                 out.flush();
-                if (isReceiveFile)
-                    isReceiveFile = false;
-            } else if (obj instanceof file) {
-                out.writeObject(obj);
-                out.flush();
+            } else {
+                for (Socket connect : connects) {
+                    ObjectOutputStream out = new ObjectOutputStream(connect.getOutputStream());
+                    if (obj instanceof String) {
+                        out.writeObject(obj);
+                    } else if (obj instanceof file) {
+                        out.writeObject(obj);
+                    }
+                    out.flush();
+                }
             }
         }
 
         public void stopChat() {
-            try {
-                connect.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (Socket connect : connects) {
+                try {
+                    connect.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 

@@ -83,77 +83,53 @@ public class client {
         ArrayList<ObjectOutputStream> outputs = new ArrayList<>();
         boolean allAccepted = true;
 
-        System.out.println("Starting group chat creation...");
-        System.out.println("Guest list: " + guest);
-
-        // First, create all connections and send requests
         for (String guestUser : guest) {
-            System.out.println("\nLooking for guest: " + guestUser);
-
             for (user clientUser : clientList) {
                 if (clientUser.getUsername().equals(guestUser)) {
-                    System.out.println("Match found! Creating connection for: " + guestUser);
-
                     try {
                         Socket connectionSocket = new Socket(InetAddress.getByName(IP), clientUser.getPort());
-                        System.out.println("Socket created for: " + guestUser);
-
-                        // Create and store output stream first
                         ObjectOutputStream out = new ObjectOutputStream(connectionSocket.getOutputStream());
                         out.flush(); // Important: flush the header
-                        System.out.println("Output stream created for: " + guestUser);
 
                         connections.add(connectionSocket);
                         outputs.add(out);
 
                         // Send the request
                         String request = encode.groupChatRequest(username, guest, groupName);
-                        System.out.println("Sending request to: " + guestUser);
                         out.writeObject(request);
                         out.flush();
-                        System.out.println("Request sent to: " + guestUser);
                         break;
                     } catch (Exception e) {
-                        System.out.println("Error creating connection for " + guestUser);
                         e.printStackTrace();
                     }
                 }
             }
         }
 
-        System.out.println("\nTotal connections created: " + connections.size());
-
-        // Now create input streams and wait for responses
         for (int i = 0; i < connections.size(); i++) {
             Socket socket = connections.get(i);
             try {
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 String message = (String) in.readObject();
-                System.out.println("Received response: " + message);
-
                 if (message.equals(constants.reject)) {
                     allAccepted = false;
                     break;
                 }
             } catch (Exception e) {
-                System.out.println("Error reading response");
                 e.printStackTrace();
                 allAccepted = false;
                 break;
             }
         }
 
-        // Clean up based on responses
         if (!allAccepted) {
-            System.out.println("Someone rejected the group chat");
             JOptionPane.showMessageDialog(new JFrame(), "One of your friends denied to connect with you!");
         } else if (!connections.isEmpty()) {
-            System.out.println("All accepted, creating group chat UI");
-            new groupChatUI(username, guest, connections.get(0), clientPort, groupName);
+            System.out.println("Creator connections: " + connections);
+            new groupChatUI(username, guest, connections, clientPort, groupName);
         }
 
-        // Close connections that aren't needed anymore
-        if (!allAccepted) {
+        if (!allAccepted) { 
             for (Socket socket : connections) {
                 try {
                     socket.close();

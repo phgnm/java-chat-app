@@ -37,7 +37,6 @@ public class clientUtils {
                     connection = user.accept();
                     in = new ObjectInputStream(connection.getInputStream());
                     String message = (String) in.readObject();
-                    System.out.println(message);
                     String[] messageParts = message.split(" ");
                     String name = messageParts[0];
                     if (Objects.equals(messageParts[1], constants.startChat))
@@ -55,18 +54,26 @@ public class clientUtils {
                     else if (Objects.equals(messageParts[1], constants.startGroupChat))
                     {
                         String[] userList = name.split("~~~");
-                        int res = JOptionPane.showConfirmDialog(new JFrame(), userList[0] + " wants to create a group what with you and " + (userList.length - 2) + " other people", null, JOptionPane.YES_NO_OPTION);
+                        int res = JOptionPane.showConfirmDialog(new JFrame(), userList[0] + " wants to create a group chat with you and " + (userList.length - 2) + " other people", null, JOptionPane.YES_NO_OPTION);
                         ObjectOutputStream out = new ObjectOutputStream(connection.getOutputStream());
-                        if (res == 1)
+
+                        if (res == 1) {
                             out.writeObject(constants.reject);
+                        }
                         else if (res == 0) {
                             String groupName = userList[userList.length - 1];
                             ArrayList<String> guestList = new ArrayList<>(Arrays.asList(userList));
                             guestList.removeFirst();
                             guestList.removeLast();
                             out.writeObject(constants.accept);
-                            new groupChatUI(username, guestList, connection, port, groupName);
+
+                            List<Socket> connections = new ArrayList<>();
+                            connections.add(connection);
+
+                            System.out.println("Guest connections: " + connections);
+                            new groupChatUI(username, guestList, connections, port, groupName);
                         }
+                        out.flush();
                     }
                 }
                 catch(Exception e) {

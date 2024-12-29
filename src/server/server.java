@@ -166,7 +166,6 @@ public class server extends JFrame {
                     startButton.setEnabled(true);
                 }
                 catch (Exception ex) {
-                    System.out.println("Here");
                     ex.printStackTrace();
                     server.updateMessage("SERVER STOPS");
                     status.setText("<html><font color='red'>STOPPED</font></html>");
