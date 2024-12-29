@@ -14,7 +14,7 @@ public class client {
     private InetAddress IP;
     private int serverPort;
     private static int clientPort = 10000;
-    private int timeOut = 10000;
+    private int timeOut = 5000;
     private String username = "";
     private boolean isStop = false;
     private Socket clientSocket;
