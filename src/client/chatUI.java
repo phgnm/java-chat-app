@@ -105,9 +105,19 @@ public class chatUI extends JFrame {
         String filename = currentList[0] + "_" + currentList[1] + ".txt";
 
         String historyFile = URL_DIR + "\\src\\history\\" + filename;
-        File historyDir = new File(historyFile);
+        File historyDir = new File(URL_DIR + "\\src\\history");
         if (!historyDir.exists()) {
             historyDir.mkdirs();
+        }
+
+        File historyFileObj = new File(historyFile);
+        if (!historyFileObj.exists()) {
+            try {
+                historyFileObj.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
         }
 
         try {
@@ -138,6 +148,11 @@ public class chatUI extends JFrame {
         String filename = currentList[0] + "_" + currentList[1] + ".txt";
         String historyFile = URL_DIR + "\\src\\history\\" + filename;
 
+        File historyDir = new File(URL_DIR + "\\src\\history");
+        if (!historyDir.exists()) {
+            historyDir.mkdirs();
+        }
+
         try {
             FileWriter writer = new FileWriter(historyFile, true); // append mode
             writer.write(sender + "```" + message + "\n");
@@ -154,6 +169,11 @@ public class chatUI extends JFrame {
             Arrays.sort(currentList);
             String filename = currentList[0] + "_" + currentList[1] + ".txt";
             String historyFile = URL_DIR + "\\src\\history\\" + filename;
+
+            File historyDir = new File(URL_DIR + "\\src\\history");
+            if (!historyDir.exists()) {
+                historyDir.mkdirs();
+            }
 
             try {
                 FileWriter writer = new FileWriter(historyFile);
@@ -394,6 +414,11 @@ public class chatUI extends JFrame {
                                 Arrays.sort(currentList);
                                 String filename = currentList[0] + "_" + currentList[1] + ".txt";
                                 String historyFile = URL_DIR + "\\src\\history\\" + filename;
+
+                                File historyDir = new File(URL_DIR + "\\src\\history");
+                                if (!historyDir.exists()) {
+                                    historyDir.mkdirs();
+                                }
 
                                 FileWriter writer = new FileWriter(historyFile);
                                 for (String message : chatHistory) {

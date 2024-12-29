@@ -144,7 +144,6 @@ public class groupChatUI extends JFrame {
         String filename = "Group_" + groupName + ".txt";
         String historyFile = URL_DIR + "\\src\\history\\" + filename;
 
-        // Ensure directory exists
         File historyDir = new File(URL_DIR + "\\src\\history");
         if (!historyDir.exists()) {
             historyDir.mkdirs();
@@ -163,7 +162,6 @@ public class groupChatUI extends JFrame {
             String filename = "Group_" + groupName + ".txt";
             String historyFile = URL_DIR + "\\src\\history\\" + filename;
 
-            // Ensure directory exists
             File historyDir = new File(URL_DIR + "\\src\\history");
             if (!historyDir.exists()) {
                 historyDir.mkdirs();

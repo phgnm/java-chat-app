@@ -191,7 +191,7 @@ public class clientUI extends JFrame implements WindowListener {
         dialog.setLocationRelativeTo(this);
 
         JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JTextField groupNameField = new JTextField(20);
+        JTextField groupNameField = new JTextField(15);
         namePanel.add(new JLabel("Group Name: "));
         namePanel.add(groupNameField);
 

@@ -1,3 +1,6 @@
 # Java Chat App
-## App is under construction
-## Expected to be done before 31/12/2024
+## Ownder information:
+* Full name: Võ Phương Nam
+* Student ID: 22127289
+* Email: vpnam22@clc.fitus.edu.vn
+* App demo: 
