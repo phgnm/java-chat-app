@@ -13,15 +13,18 @@ import java.util.*;
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
+import java.util.List;
 
-public class chatUI extends JFrame {
+public class groupChatUI extends JFrame {
     private static String URL_DIR = System.getProperty("user.dir");
     private Socket socketChat;
-    private String userName = "", guestName = "", nameFile = "";
+    private String userName = "", nameFile = "", groupName = "";
     public boolean isStop = false, isSendFile = false, isReceiveFile = false;
     private ChatRoom chat;
     private int portServer = 0;
     private ArrayList<String> chatHistory = new ArrayList<>();
+    private ArrayList<String> guestName;
+    private List<Socket> socketChats;
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -29,26 +32,28 @@ public class chatUI extends JFrame {
     private JTextPane MessagesPane;
     private JButton sendFileButton;
     private JLabel receiveStatus;
-    private chatUI frame = this;
+    private groupChatUI frame = this;
     private JProgressBar progressBar;
     private JButton sendButton;
 
-    public chatUI(String user, String guest, Socket socket, int port) throws Exception {
+    public groupChatUI(String user, ArrayList<String> guest, Socket socket, int port, String groupname) {
         super();
         userName = user;
         guestName = guest;
         socketChat = socket;
-        frame = new chatUI(user, guest, socket, port, port);
+        groupName = groupname;
+        frame = new groupChatUI(user, guest, socket, port, groupName, port);
         frame.setVisible(true);
     }
 
-    public chatUI(String user, String guest, Socket socket, int port, int a) {
+    public groupChatUI(String user, ArrayList<String> guest, Socket socket, int port, String groupname, int a) {
         super();
         userName = user;
         guestName = guest;
         socketChat = socket;
+        groupName = groupname;
         this.portServer = port;
-        chat = new ChatRoom(socketChat, userName, guestName);
+        chat = new ChatRoom(socketChat, userName, guestName, groupName);
         chat.start();
         EventQueue.invokeLater(() -> {
             try {
@@ -100,18 +105,25 @@ public class chatUI extends JFrame {
 
     private void loadChatHistory() {
         chatHistory.clear();
-        String[] currentList = {userName, guestName};
-        Arrays.sort(currentList);
-        String filename = currentList[0] + "_" + currentList[1] + ".txt";
-
+        String filename = "Group_" + groupName + ".txt";
         String historyFile = URL_DIR + "\\src\\history\\" + filename;
-        File historyDir = new File(historyFile);
+
+        File historyDir = new File(URL_DIR + "\\src\\history");
         if (!historyDir.exists()) {
             historyDir.mkdirs();
         }
 
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(historyDir));
+        File historyFileObj = new File(historyFile);
+        if (!historyFileObj.exists()) {
+            try {
+                historyFileObj.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(historyFileObj))) {
             String chatLine;
             while ((chatLine = br.readLine()) != null) {
                 String[] chatComponents = chatLine.split("```");
@@ -119,29 +131,28 @@ public class chatUI extends JFrame {
                     chatHistory.add(chatLine + "\n");
                     if (chatComponents[0].equals(userName)) {
                         updateChat_send(chatComponents[1]);
-                    }
-                    else {
+                    } else {
                         updateChat_receive(chatComponents[1]);
                     }
                 }
             }
-            br.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void saveMessageToHistory(String sender, String message) {
-        String[] currentList = {userName, guestName};
-        Arrays.sort(currentList);
-        String filename = currentList[0] + "_" + currentList[1] + ".txt";
+        String filename = "Group_" + groupName + ".txt";
         String historyFile = URL_DIR + "\\src\\history\\" + filename;
 
-        try {
-            FileWriter writer = new FileWriter(historyFile, true); // append mode
+        // Ensure directory exists
+        File historyDir = new File(URL_DIR + "\\src\\history");
+        if (!historyDir.exists()) {
+            historyDir.mkdirs();
+        }
+
+        try (FileWriter writer = new FileWriter(historyFile, true)) { // append mode
             writer.write(sender + "```" + message + "\n");
-            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -150,17 +161,19 @@ public class chatUI extends JFrame {
     private void deleteMessageFromHistory(int messageIndex) {
         if (messageIndex >= 0 && messageIndex < chatHistory.size()) {
             chatHistory.remove(messageIndex);
-            String[] currentList = {userName, guestName};
-            Arrays.sort(currentList);
-            String filename = currentList[0] + "_" + currentList[1] + ".txt";
+            String filename = "Group_" + groupName + ".txt";
             String historyFile = URL_DIR + "\\src\\history\\" + filename;
 
-            try {
-                FileWriter writer = new FileWriter(historyFile);
+            // Ensure directory exists
+            File historyDir = new File(URL_DIR + "\\src\\history");
+            if (!historyDir.exists()) {
+                historyDir.mkdirs();
+            }
+
+            try (FileWriter writer = new FileWriter(historyFile)) {
                 for (String message : chatHistory) {
-                    writer.write(message + "\n");
+                    writer.write(message);
                 }
-                writer.close();
                 try {
                     chat.sendMessage(constants.deleteMessage + messageIndex);
                 } catch (Exception e) {
@@ -225,7 +238,7 @@ public class chatUI extends JFrame {
             }
         });
         setResizable(false);
-        setTitle("Chat with " + guestName);
+        setTitle("Group chat: " + groupName);
         setBounds(100, 100, 576, 560);
         JPanel contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -238,7 +251,7 @@ public class chatUI extends JFrame {
         contentPane.add(panel);
         panel.setLayout(null);
 
-        JLabel nameLabel = new JLabel(guestName);
+        JLabel nameLabel = new JLabel(groupName);
         nameLabel.setFont(new Font("Tahoma", Font.PLAIN, 32));
         nameLabel.setToolTipText("");
         nameLabel.setBounds(20, 5, 250, 50);
@@ -280,7 +293,7 @@ public class chatUI extends JFrame {
         sendButton.setBorder(new EmptyBorder(0, 0, 0, 0));
         sendButton.setContentAreaFilled(false);
         sendButton.setIcon(new ImageIcon(new ImageIcon(
-                Objects.requireNonNull(chatUI.class.getResource("/images/send.png"))).getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT)));
+                Objects.requireNonNull(groupChatUI.class.getResource("/images/send.png"))).getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT)));
 
         sendButton.addActionListener(_ -> {
             String msg = Messages.getText();
@@ -323,7 +336,7 @@ public class chatUI extends JFrame {
         sendFileButton.setBorder(new EmptyBorder(0, 0, 0, 0));
         sendFileButton.setContentAreaFilled(false);
         sendFileButton.setIcon(new ImageIcon(new ImageIcon(
-                Objects.requireNonNull(chatUI.class.getResource("/images/document.png"))).getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT)));
+                Objects.requireNonNull(groupChatUI.class.getResource("/images/document.png"))).getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT)));
         sendFileButton.setBounds(440, 5, 50, 50);
         panel3.add(sendFileButton);
 
@@ -355,9 +368,10 @@ public class chatUI extends JFrame {
         private InputStream fileSend;
         private file dataFile;
 
-        public ChatRoom(Socket connection, String name, String guest) {
+        public ChatRoom(Socket connection, String name, ArrayList<String> guest, String groupname) {
             connect = connection;
             guestName = guest;
+            groupName = groupname;
         }
 
         @Override
@@ -390,9 +404,7 @@ public class chatUI extends JFrame {
                             int messageIndex = Integer.parseInt(indexStr);
                             if (messageIndex >= 0 && messageIndex < chatHistory.size()) {
                                 chatHistory.remove(messageIndex);
-                                String[] currentList = {userName, guestName};
-                                Arrays.sort(currentList);
-                                String filename = currentList[0] + "_" + currentList[1] + ".txt";
+                                String filename = "Group_" + groupName + ".txt";
                                 String historyFile = URL_DIR + "\\src\\history\\" + filename;
 
                                 FileWriter writer = new FileWriter(historyFile);
@@ -400,7 +412,7 @@ public class chatUI extends JFrame {
                                     writer.write(message + "\n");
                                 }
                                 writer.close();
-                                SwingUtilities.invokeLater(chatUI.this::refreshChatDisplay);
+                                SwingUtilities.invokeLater(groupChatUI.this::refreshChatDisplay);
                             }
                         }
                         else if (decode.checkFile(msgObj)) {

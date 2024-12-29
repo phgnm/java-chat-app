@@ -57,11 +57,11 @@ public class decode {
         }
         return users;
     }
-    public static ArrayList<user> updateOnline(ArrayList<user> users, String message) {
+    public static void updateOnline(ArrayList<user> users, String message) {
         String[] split = message.split(" ");
         if (split.length > 1) {
             if (split[1].equals(constants.onlineServer)) {
-                return users;
+                return;
             }
             if (split[1].equals(constants.offlineServer)) {
                 for (int i = 0; i < users.size(); i++) {
@@ -72,15 +72,8 @@ public class decode {
                 }
             }
         }
-        return users;
     }
-    public static String getNameRequest(String message) {
-        String [] split = message.split(" ");
-        if (split.length > 1 && split[1].equals(constants.startChat)) {
-                return split[0];
-        }
-        return null;
-    }
+
     public static String getMessage(String message) {
         String[] split = message.split(" ");
         if (split[0].equals(constants.messageOpen))

@@ -1,10 +1,13 @@
 package client;
 
+import data.user;
+
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.*;
 import java.net.*;
 
 public class clientUI extends JFrame implements WindowListener {
@@ -19,6 +22,7 @@ public class clientUI extends JFrame implements WindowListener {
     static DefaultListModel<String> model = new DefaultListModel<>();
     String File = System.getProperty("user.dir") + "\\src\\server.txt";
     private JButton saveButton;
+    private JButton createGroupButton;
 
     public clientUI(String ip, int port_Client, String name, String msg, int port_Server) throws Exception {
         IPClient = ip;
@@ -73,7 +77,6 @@ public class clientUI extends JFrame implements WindowListener {
         contentPane.add(panel);
         panel.setLayout(new GridLayout(1, 1));
 
-        System.out.println("Number of friends: " + model.size());
         activeList = new JList<>(model);
         activeList.setBorder(new EmptyBorder(5, 5, 5, 5));
         activeList.setBackground(Color.WHITE);
@@ -142,6 +145,13 @@ public class clientUI extends JFrame implements WindowListener {
         saveButton.setFocusable(false);
         saveButton.setBounds(490, 420, 110, 30);
         contentPane.add(saveButton);
+
+        createGroupButton = new JButton("+");
+        createGroupButton.setFont(new Font("Tahoma", Font.BOLD, 18));
+        createGroupButton.setBounds(460, 10, 50, 30);
+        createGroupButton.addActionListener(e -> groupCreation());
+        contentPane.add(createGroupButton);
+
         activeList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent arg0) {
@@ -174,8 +184,128 @@ public class clientUI extends JFrame implements WindowListener {
         }
     }
 
+    private void groupCreation() {
+        JDialog dialog = new JDialog(this, "Create Group Chat", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.setSize(300, 500);
+        dialog.setLocationRelativeTo(this);
+
+        JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JTextField groupNameField = new JTextField(20);
+        namePanel.add(new JLabel("Group Name: "));
+        namePanel.add(groupNameField);
+
+        JPanel userPanel = new JPanel();
+        userPanel.setLayout(new BoxLayout(userPanel, BoxLayout.Y_AXIS));
+        Map<String, JCheckBox> userCheckboxes = new HashMap<>();
+
+        ListModel<String> model = activeList.getModel();
+        for (int i = 0; i < model.getSize(); i++) {
+            String user = model.getElementAt(i);
+            if (!user.equals(username)) { // Don't include current user
+                JCheckBox checkbox = new JCheckBox(user);
+                userCheckboxes.put(user, checkbox);
+                userPanel.add(checkbox);
+            }
+        }
+
+        JScrollPane scrollPane = new JScrollPane(userPanel);
+
+        JPanel buttonPanel = new JPanel();
+        JButton createButton = new JButton("Create Group");
+        JButton cancelButton = new JButton("Cancel");
+
+        createButton.addActionListener(_ -> {
+            ArrayList<String> selectedUsers = new ArrayList<>();
+            selectedUsers.add(username);
+
+            for (Map.Entry<String, JCheckBox> entry : userCheckboxes.entrySet()) {
+                if (entry.getValue().isSelected()) {
+                    selectedUsers.add(entry.getKey());
+                }
+            }
+
+            if (selectedUsers.size() < 3) {
+                JOptionPane.showMessageDialog(dialog,
+                        "Please select at least 2 other users for the group chat.",
+                        "Invalid Selection",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String groupName = groupNameField.getText().trim();
+            if (groupName.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog,
+                        "Please enter a group name.",
+                        "Invalid Name",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            createGroupChat(groupName, selectedUsers);
+            dialog.dispose();
+        });
+
+
+
+        cancelButton.addActionListener(_ -> dialog.dispose());
+
+        buttonPanel.add(createButton);
+        buttonPanel.add(cancelButton);
+
+        dialog.add(namePanel, BorderLayout.NORTH);
+        dialog.add(scrollPane, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.setVisible(true);
+    }
+
+    private void createGroupChat(String groupName, ArrayList<String> selectedUsers) {
+        int n = JOptionPane.showConfirmDialog(this,
+                "Do you want to create a group chat with these " + (selectedUsers.size() - 1) + " people?",
+                "Group Creation",
+                JOptionPane.YES_NO_OPTION);
+
+        if (n == 0) {
+            if (selectedUsers.isEmpty() || client.clientList == null) {
+                JOptionPane.showMessageDialog(this, "Invalid selection!");
+                return;
+            }
+            ArrayList<user> groupMembers = new ArrayList<>();
+            for (String selectedUser : selectedUsers) {
+                if (selectedUser.equals(username)) continue; // Skip current user
+
+                boolean found = false;
+                for (user info : client.clientList) {
+                    if (selectedUser.equals(info.getUsername())) {
+                        groupMembers.add(info);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    JOptionPane.showMessageDialog(this,
+                            "User " + selectedUser + " is not found. Please update your friend list.");
+                    return;
+                }
+            }
+
+            try {
+                user firstMember = groupMembers.getFirst();
+                clientNode.initialNewGroupChat(
+                        firstMember.getHost(),
+                        selectedUsers,
+                        groupName
+                );
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Failed to create group chat!");
+            }
+        }
+    }
+
     private void connectChat() {
-        int n = JOptionPane.showConfirmDialog(this, "Do you want to connect to this guy?", "Connection",
+        int n = JOptionPane.showConfirmDialog(this, "Do you want to connect to this person?", "Connection",
                 JOptionPane.YES_NO_OPTION);
         if (n == 0) {
             if (name.isEmpty() || client.clientList == null) {

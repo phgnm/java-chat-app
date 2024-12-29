@@ -1,7 +1,7 @@
 package utils;
 
 public class constants {
-    public static int maxMsgSize = 1000000;
+    public static int maxMsgSize = 1024000;
 
     public static String existName = "This name is already used, please try again";
     public static String unmatchedLogin = "Name and password are unmatched, please try again";
@@ -11,6 +11,7 @@ public class constants {
     public static String login = "<USER_LOGIN>";
 
     public static String startChat = "<CHAT_START>";
+    public static String startGroupChat = "<GROUP_CHAT_START>";
     public static String messageOpen = "<MESSAGE_OPEN>";
     public static String closeChat = "<CHAT_CLOSE>";
     public static String deleteMessage = "<MESSAGE_DELETE>";

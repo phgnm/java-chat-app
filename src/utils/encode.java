@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.ArrayList;
 import java.util.regex.*;
 
 public class encode {
@@ -18,6 +19,14 @@ public class encode {
     }
     public static String chatRequest(String name) {
         return name + ' ' + constants.startChat;
+    }
+    public static String groupChatRequest(String creator, ArrayList<String> name, String groupName) {
+        StringBuilder nameList = new StringBuilder(creator);
+        for (String s : name) {
+            nameList.append("~~~").append(s);
+        }
+        nameList.append("~~~").append(groupName);
+        return nameList.toString() + ' ' + constants.startGroupChat;
     }
     public static String sendMessage(String message) {
         Matcher findMessage = messageCheck.matcher(message);
